@@ -1,0 +1,26 @@
+{
+  "name": "svg-to-stl-cli",
+  "version": "1.0.0",
+  "description": "CLI tool to convert SVG files to STL for 3D printing",
+  "main": "src/index.js",
+  "type": "module",
+  "bin": {
+    "svg-to-stl": "./bin/svg-to-stl.js"
+  },
+  "scripts": {
+    "svg-to-stl": "node bin/svg-to-stl.js"
+  },
+  "keywords": [
+    "svg",
+    "stl",
+    "3d-printing",
+    "cli"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^12.1.0",
+    "jsdom": "^25.0.1",
+    "three": "^0.170.0"
+  }
+}
