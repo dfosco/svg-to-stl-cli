@@ -219,13 +219,22 @@ function transformSVGPath(pathStr) {
         cy = Math.sin(xar) * x2 + Math.cos(xar) * y2 + (y + ny) / 2;
         const u = new THREE.Vector2(1, 0);
         const v = new THREE.Vector2((x1 - x2) / rx, (y1 - y2) / ry);
-        let startAng = Math.acos(Math.max(-1, Math.min(1, u.dot(v) / u.length() / v.length())));
-        if (u.x * v.y - u.y * v.x < 0)
-          startAng = -startAng;
+        const uLen = u.length();
+        const vLen = v.length();
+        let startAng = 0;
+        if (uLen > 0 && vLen > 0) {
+          startAng = Math.acos(Math.max(-1, Math.min(1, u.dot(v) / uLen / vLen)));
+          if (u.x * v.y - u.y * v.x < 0)
+            startAng = -startAng;
+        }
         const uAng = new THREE.Vector2((-x1 - x2) / rx, (-y1 - y2) / ry);
-        let deltaAng = Math.acos(Math.max(-1, Math.min(1, v.dot(uAng) / v.length() / uAng.length())));
-        if (v.x * uAng.y - v.y * uAng.x < 0)
-          deltaAng = -deltaAng;
+        const uAngLen = uAng.length();
+        let deltaAng = 0;
+        if (vLen > 0 && uAngLen > 0) {
+          deltaAng = Math.acos(Math.max(-1, Math.min(1, v.dot(uAng) / vLen / uAngLen)));
+          if (v.x * uAng.y - v.y * uAng.x < 0)
+            deltaAng = -deltaAng;
+        }
         if (!sf && deltaAng > 0)
           deltaAng -= Math.PI * 2;
         if (sf && deltaAng < 0)
@@ -237,9 +246,8 @@ function transformSVGPath(pathStr) {
         } else {
           // Fallback: create a path first with moveTo at the start of the arc
           path.moveTo(x, y);
-          if (path.currentPath) {
-            path.currentPath.absarc(cx, cy, rx, startAng, startAng + deltaAng, sf ? 1 : 0);
-          }
+          // moveTo always creates currentPath
+          path.currentPath.absarc(cx, cy, rx, startAng, startAng + deltaAng, sf ? 1 : 0);
         }
         x = nx;
         y = ny;
@@ -336,7 +344,8 @@ function flattenSvgPaths(svgDoc) {
     const points = polygon.getAttribute('points');
     if (points) {
       // Parse points: can be "x1,y1 x2,y2 ..." or "x1 y1 x2 y2 ..."
-      const coords = points.trim().split(/[\s,]+/);
+      // Filter out empty strings from malformed input
+      const coords = points.trim().split(/[\s,]+/).filter(c => c.length > 0);
       // Ensure we have at least 3 points (6 coordinates) and even number of coordinates
       if (coords.length >= 6 && coords.length % 2 === 0) {
         let d = `M ${coords[0]},${coords[1]}`;
@@ -354,7 +363,8 @@ function flattenSvgPaths(svgDoc) {
     const points = polyline.getAttribute('points');
     if (points) {
       // Parse points: can be "x1,y1 x2,y2 ..." or "x1 y1 x2 y2 ..."
-      const coords = points.trim().split(/[\s,]+/);
+      // Filter out empty strings from malformed input
+      const coords = points.trim().split(/[\s,]+/).filter(c => c.length > 0);
       // Ensure we have at least 2 points (4 coordinates) and even number of coordinates
       if (coords.length >= 4 && coords.length % 2 === 0) {
         let d = `M ${coords[0]},${coords[1]}`;

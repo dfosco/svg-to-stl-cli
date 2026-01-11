@@ -71,6 +71,7 @@ There are example SVG files in [example-svg/Entypo].
   - Reversing the winding order (CW/CCW) of SVG paths for incorrectly-built SVG files
 
 ### Known Limitations
+  - The base plate and type are output as separate meshes rather than using CSG (Constructive Solid Geometry) operations to merge them. For most 3D printing purposes, this is functionally equivalent, but slicers will process them separately.
   - A hole in an SVG path should be defined by points in counter-clockwise order, where the shape outline is defined by points in a clockwise order, or vice versa. Some SVG creation tools don't do this correctly, and shapes render in 3D space as "inside out".
     - You can try the `--reverse-winding-order` option to fix this, but it's possible to have both combinations of winding in the same file, ensuring that some part is always inside out.
   - A hole that is not a hole, but an additional shape filled with background color will not render as a hole.
