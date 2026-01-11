@@ -186,14 +186,32 @@ function transformSVGPath(pathStr) {
         sf = eatNum();
         nx = eatNum();
         ny = eatNum();
+        
+        // Guard against zero radius - if radius is zero, just draw a line
+        if (rx === 0 || ry === 0) {
+          path.lineTo(nx, ny);
+          x = nx;
+          y = ny;
+          break;
+        }
+        
         if (rx !== ry) {
           console.warn("Forcing elliptical arc to be a circular one :(", rx, ry);
         }
         x1 = Math.cos(xar) * (x - nx) / 2 + Math.sin(xar) * (y - ny) / 2;
         y1 = -Math.sin(xar) * (x - nx) / 2 + Math.cos(xar) * (y - ny) / 2;
-        const norm = Math.sqrt(
-          (rx*rx * ry*ry - rx*rx * y1*y1 - ry*ry * x1*x1) /
-          (rx*rx * y1*y1 + ry*ry * x1*x1));
+        
+        // Guard against division by zero
+        const denominator = rx*rx * y1*y1 + ry*ry * x1*x1;
+        if (denominator === 0) {
+          path.lineTo(nx, ny);
+          x = nx;
+          y = ny;
+          break;
+        }
+        
+        const normVal = (rx*rx * ry*ry - rx*rx * y1*y1 - ry*ry * x1*x1) / denominator;
+        const norm = Math.sqrt(Math.max(0, normVal)); // Ensure non-negative for sqrt
         const normSign = (laf === sf) ? -norm : norm;
         x2 = normSign * rx * y1 / ry;
         y2 = normSign * -ry * x1 / rx;
@@ -201,11 +219,11 @@ function transformSVGPath(pathStr) {
         cy = Math.sin(xar) * x2 + Math.cos(xar) * y2 + (y + ny) / 2;
         const u = new THREE.Vector2(1, 0);
         const v = new THREE.Vector2((x1 - x2) / rx, (y1 - y2) / ry);
-        let startAng = Math.acos(u.dot(v) / u.length() / v.length());
+        let startAng = Math.acos(Math.max(-1, Math.min(1, u.dot(v) / u.length() / v.length())));
         if (u.x * v.y - u.y * v.x < 0)
           startAng = -startAng;
         const uAng = new THREE.Vector2((-x1 - x2) / rx, (-y1 - y2) / ry);
-        let deltaAng = Math.acos(v.dot(uAng) / v.length() / uAng.length());
+        let deltaAng = Math.acos(Math.max(-1, Math.min(1, v.dot(uAng) / v.length() / uAng.length())));
         if (v.x * uAng.y - v.y * uAng.x < 0)
           deltaAng = -deltaAng;
         if (!sf && deltaAng > 0)
@@ -213,8 +231,15 @@ function transformSVGPath(pathStr) {
         if (sf && deltaAng < 0)
           deltaAng += Math.PI * 2;
         // Use currentPath.absarc since ShapePath doesn't have absarc directly
+        // The currentPath is created after moveTo is called
         if (path.currentPath) {
-          path.currentPath.absarc(cx, cy, rx, startAng, startAng + deltaAng, sf);
+          path.currentPath.absarc(cx, cy, rx, startAng, startAng + deltaAng, sf ? 1 : 0);
+        } else {
+          // Fallback: create a path first with moveTo at the start of the arc
+          path.moveTo(x, y);
+          if (path.currentPath) {
+            path.currentPath.absarc(cx, cy, rx, startAng, startAng + deltaAng, sf ? 1 : 0);
+          }
         }
         x = nx;
         y = ny;
@@ -310,8 +335,17 @@ function flattenSvgPaths(svgDoc) {
   polygons.forEach(polygon => {
     const points = polygon.getAttribute('points');
     if (points) {
-      const d = `M ${points} Z`;
-      pathStrings.push(d);
+      // Parse points: can be "x1,y1 x2,y2 ..." or "x1 y1 x2 y2 ..."
+      const coords = points.trim().split(/[\s,]+/);
+      // Ensure we have at least 3 points (6 coordinates) and even number of coordinates
+      if (coords.length >= 6 && coords.length % 2 === 0) {
+        let d = `M ${coords[0]},${coords[1]}`;
+        for (let i = 2; i < coords.length; i += 2) {
+          d += ` L ${coords[i]},${coords[i + 1]}`;
+        }
+        d += ' Z';
+        pathStrings.push(d);
+      }
     }
   });
   
@@ -319,8 +353,16 @@ function flattenSvgPaths(svgDoc) {
   polylines.forEach(polyline => {
     const points = polyline.getAttribute('points');
     if (points) {
-      const d = `M ${points}`;
-      pathStrings.push(d);
+      // Parse points: can be "x1,y1 x2,y2 ..." or "x1 y1 x2 y2 ..."
+      const coords = points.trim().split(/[\s,]+/);
+      // Ensure we have at least 2 points (4 coordinates) and even number of coordinates
+      if (coords.length >= 4 && coords.length % 2 === 0) {
+        let d = `M ${coords[0]},${coords[1]}`;
+        for (let i = 2; i < coords.length; i += 2) {
+          d += ` L ${coords[i]},${coords[i + 1]}`;
+        }
+        pathStrings.push(d);
+      }
     }
   });
   
