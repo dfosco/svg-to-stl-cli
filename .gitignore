@@ -1,0 +1,4 @@
+node_modules/
+/*.stl
+/*.svg
+package-lock.json
