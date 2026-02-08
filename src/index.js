@@ -38,9 +38,13 @@ function transformSVGPath(pathStr) {
         continue;
       }
       else if (c === PERIOD) {
+        if (isFloat) break; // second decimal point starts a new number
         idx++;
         isFloat = true;
         continue;
+      }
+      else if (c === MINUS) {
+        break; // minus sign mid-number starts a new number
       }
       s = pathStr.substring(sidx, idx);
       return isFloat ? parseFloat(s) : parseInt(s);
@@ -58,7 +62,7 @@ function transformSVGPath(pathStr) {
       idx++;
     }
     c = pathStr.charCodeAt(idx);
-    return (c === MINUS || (DIGIT_0 <= c && c <= DIGIT_9));
+    return (c === MINUS || c === PERIOD || (DIGIT_0 <= c && c <= DIGIT_9));
   }
   
   let canRepeat;
