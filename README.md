@@ -5,6 +5,8 @@ A command-line tool to convert [scalable vector graphics] (SVG) files into [ster
 ## Installation
 
 ```bash
+git clone git@github.com:dfosco/svg-to-stl-cli.git
+cd svg-to-stl-cli
 npm install
 ```
 
@@ -13,6 +15,7 @@ npm install
 To use `svg-stl` from anywhere on your machine, install it globally:
 
 ```bash
+cd svg-to-stl-cli
 npm install -g .
 ```
 
@@ -97,8 +100,10 @@ There are example SVG files in [example-svg/Entypo].
   - A hole that is not a hole, but an additional shape filled with background color will not render as a hole.
   - SVG text elements are not supported. To render text, you need to convert the text to "outlines" or "paths" before saving the SVG file.
 
-### Version
-1.0.0
+
+### Supported Platforms
+
+For now tested on MacOS, but if you try on Linux or Windows WSL and something breaks, open an issue!
 
 ### Dependencies
 * [three.js] - For 3D geometry creation and rendering
@@ -112,3 +117,7 @@ There are example SVG files in [example-svg/Entypo].
    [three.js]: <https://github.com/mrdoob/three.js>
    [jsdom]: <https://github.com/jsdom/jsdom>
    [commander]: <https://github.com/tj/commander.js>
+
+### Acknoledgments
+
+Props to @rcalme who open sourced https://github.com/rcalme/svg-to-stl eleven years ago and made creating this CLI a breeze 🙇‍♂️
