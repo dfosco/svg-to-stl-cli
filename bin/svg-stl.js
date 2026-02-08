@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import { convertSvgToStl } from '../src/index.js';
 
 program
-  .name('svg-to-stl')
+  .name('svg-stl')
   .description('Convert SVG files to STL for 3D printing')
   .version('1.0.0')
   .argument('<input>', 'Input SVG file path')
@@ -14,8 +14,8 @@ program
   .option('--invert-type', 'Invert type', false)
   .option('--flare-type', 'Flare type (bevel)', false)
   .option('--reverse-winding-order', 'Reverse winding order', false)
-  .option('--no-base-plate', 'Disable base plate')
-  .option('--base-plate-shape <shape>', 'Base plate shape (Rectangular or Circular)', 'Rectangular')
+  .option('--base-plate', 'Enable rectangular base plate')
+  .option('--base-plate-circle', 'Enable circular base plate')
   .option('--base-depth <mm>', 'Depth of base in mm', '5')
   .option('--buffer <mm>', 'Buffer in mm', '5')
   .option('--color <hex>', 'Color for rendering (hex format)', '#5d9dea')
@@ -28,14 +28,17 @@ program
       const outputPath = options.output || input.replace(/\.svg$/i, '.stl');
       
       // Build options object matching original HTML form defaults
+      const wantBasePlate = options.basePlate || options.basePlateCircle || false;
+      const basePlateShape = options.basePlateCircle ? 'Circular' : 'Rectangular';
+
       const conversionOptions = {
         typeSize: Math.abs(Number(options.typeSize)),
         typeDepth: Number(options.typeDepth),
         wantInvertedType: options.invertType,
         bevelEnabled: options.flareType,
         svgWindingIsCW: options.reverseWindingOrder,
-        wantBasePlate: options.basePlate,
-        basePlateShape: options.basePlateShape,
+        wantBasePlate,
+        basePlateShape,
         baseDepth: Math.abs(Number(options.baseDepth)),
         baseBuffer: Math.abs(Number(options.buffer)),
         objectColor: options.color
