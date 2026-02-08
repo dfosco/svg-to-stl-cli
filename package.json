@@ -5,10 +5,10 @@
   "main": "src/index.js",
   "type": "module",
   "bin": {
-    "svg-to-stl": "./bin/svg-to-stl.js"
+    "svg-stl": "./bin/svg-stl.js"
   },
   "scripts": {
-    "svg-to-stl": "node bin/svg-to-stl.js"
+    "svg-stl": "node bin/svg-stl.js"
   },
   "keywords": [
     "svg",

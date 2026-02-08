@@ -8,16 +8,36 @@ A command-line tool to convert [scalable vector graphics] (SVG) files into [ster
 npm install
 ```
 
+### Global usage (recommended)
+
+To use `svg-stl` from anywhere on your machine, install it globally:
+
+```bash
+npm install -g .
+```
+
+This registers the `svg-stl` command in your PATH. You can then run it from any directory:
+
+```bash
+svg-stl <input.svg> [options]
+```
+
+To uninstall the global command later:
+
+```bash
+npm uninstall -g svg-to-stl-cli
+```
+
 ## CLI Usage
 
 ```bash
-npm run svg-to-stl -- <input.svg> [options]
+svg-stl <input.svg> [options]
 ```
 
-Or after linking:
+Or, without global install, from the project directory:
 
 ```bash
-npx svg-to-stl <input.svg> [options]
+npm run svg-stl -- <input.svg> [options]
 ```
 
 ### Options
@@ -30,8 +50,8 @@ npx svg-to-stl <input.svg> [options]
 | `--invert-type` | Invert type | false |
 | `--flare-type` | Flare type (bevel) | false |
 | `--reverse-winding-order` | Reverse winding order | false |
-| `--no-base-plate` | Disable base plate | (base plate enabled) |
-| `--base-plate-shape <shape>` | Base plate shape (Rectangular or Circular) | Rectangular |
+| `--base-plate` | Enable rectangular base plate | (no base plate) |
+| `--base-plate-circle` | Enable circular base plate | (no base plate) |
 | `--base-depth <mm>` | Depth of base in mm | 5 |
 | `--buffer <mm>` | Buffer around the image in mm | 5 |
 | `--color <hex>` | Color for rendering (hex format) | #5d9dea |
@@ -40,22 +60,22 @@ npx svg-to-stl <input.svg> [options]
 
 Basic conversion:
 ```bash
-npm run svg-to-stl -- example-svg/Entypo/star.svg
+svg-stl example-svg/Entypo/star.svg
 ```
 
 With custom output and size:
 ```bash
-npm run svg-to-stl -- example-svg/Entypo/star.svg -o star_large.stl --type-size 100
+svg-stl example-svg/Entypo/star.svg -o star_large.stl --type-size 100
 ```
 
-Without base plate:
+With rectangular base plate:
 ```bash
-npm run svg-to-stl -- example-svg/Entypo/star.svg --no-base-plate
+svg-stl example-svg/Entypo/star.svg --base-plate
 ```
 
-With circular base:
+With circular base plate:
 ```bash
-npm run svg-to-stl -- example-svg/Entypo/star.svg --base-plate-shape Circular
+svg-stl example-svg/Entypo/star.svg --base-plate-circle
 ```
 
 There are example SVG files in [example-svg/Entypo].
